@@ -1,9 +1,10 @@
 ﻿
 
+using MobileCarApp.Models.Base;
+
 namespace MobileCarApp.Models;
 
-public class CarMart
+public class CarMart : BaseEntity
 {
-    public int Id { get; set; }
     public List<Car> Cars { get; set; } = new List<Car>();
 }

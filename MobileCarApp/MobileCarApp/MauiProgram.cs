@@ -1,4 +1,8 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Logging;
+using MobileCarApp.Services;
+using MobileCarApp.ViewModels;
+using MobileCarApp.Views;
 
 namespace MobileCarApp
 {
@@ -15,8 +19,21 @@ namespace MobileCarApp
                     fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
                 });
 
+            string dbPath = Path.Combine(FileSystem.AppDataDirectory, "cars.db3");
+
+            //Services
+            builder.Services.AddSingleton<CarServices>(s => ActivatorUtilities.CreateInstance<CarServices>(s, dbPath));
+
+            //ViewModels
+            builder.Services.AddSingleton<CarListViewModel>();
+            builder.Services.AddTransient<CarDetailsViewModel>();
+            
+            //Pages
+            builder.Services.AddTransient<CarDetailsPage>();
+            builder.Services.AddSingleton<MainPage>();
+
 #if DEBUG
-    		builder.Logging.AddDebug();
+            builder.Logging.AddDebug();
 #endif
 
             return builder.Build();

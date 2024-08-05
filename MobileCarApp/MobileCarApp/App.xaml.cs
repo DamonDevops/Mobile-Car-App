@@ -1,12 +1,16 @@
-﻿namespace MobileCarApp
+﻿using MobileCarApp.Services;
+
+namespace MobileCarApp
 {
     public partial class App : Application
     {
-        public App()
+        public static CarServices CarServices { get; private set; }
+        public App(CarServices carServices)
         {
             InitializeComponent();
 
             MainPage = new AppShell();
+            CarServices = carServices;
         }
     }
 }
