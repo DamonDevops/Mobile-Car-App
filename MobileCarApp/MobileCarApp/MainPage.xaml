@@ -7,7 +7,65 @@
              Title="{Binding Title}"
              x:Class="MobileCarApp.MainPage">
 
-    <Grid ColumnDefinitions="*, *" ColumnSpacing="10" RowDefinitions="*, auto">
+    <Grid ColumnSpacing="1" RowSpacing="1" Padding="5">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <VerticalStackLayout Padding="5" Grid.Row="0" Margin="9">
+            <Entry x:Name="Make" Placeholder="Enter Make" Text="{Binding Make}"/>
+            <Entry x:Name="Model" Placeholder="Enter Model" Text="{Binding Model}"/>
+            <Entry x:Name="Vin" Placeholder="Enter Vin" Text="{Binding Vin}"/>
+        </VerticalStackLayout>
+
+        <Button Text="{Binding AddEditButtonText}" Grid.Row="1" IsEnabled="{Binding IsNotBusy}"
+                Command="{Binding SaveCarCommand}" Margin="9" />
+        <Button Text="Clear Form" Command="{Binding ClearFormCommand}" IsEnabled="{Binding IsNotBusy}" 
+                Grid.Row="2" Margin="9"/>
+
+        <RefreshView Grid.Row="4"
+                     Command="{Binding GetCarListCommand}"
+                     IsRefreshing="{Binding IsRefreshing}">
+            <CollectionView ItemsSource="{Binding Cars}" SelectionMode="None">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="model:Car">
+                        <Grid Padding="10" ColumnDefinitions="auto, *">
+                            <Frame HeightRequest="70" Grid.Column="0">
+                                <Frame.GestureRecognizers>
+                                    <TapGestureRecognizer CommandParameter="{Binding Id}"
+                                                          Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodel:CarListViewModel}}, Path=GetCarDetailsCommand}"/>
+                                </Frame.GestureRecognizers>
+                                <HorizontalStackLayout Padding="5" Spacing="5">
+                                    <Label Text="{Binding Make}"/>
+                                    <Label Text="{Binding Model}"/>
+                                </HorizontalStackLayout>
+                            </Frame>
+                            <HorizontalStackLayout Grid.Column="1">
+                                <Button Text="Update"
+                                        CommandParameter="{Binding Id}"
+                                        Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodel:CarListViewModel}}, Path=SetEditModeCommand}"
+                                        Margin="9"/>
+                                <Button Text="Delete"
+                                        CommandParameter="{Binding Id}"
+                                        Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodel:CarListViewModel}}, Path=DeleteCarCommand}"
+                                        Margin="9"/>
+                            </HorizontalStackLayout>
+                        </Grid>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+        </RefreshView>
+    </Grid>
+    
+    <!--OLD GRID-->
+    <!--<Grid ColumnDefinitions="*, *" ColumnSpacing="10" RowDefinitions="*, auto">
         <RefreshView Grid.ColumnSpan="2"
                      Command="{Binding GetCarListCommand}"
                      IsRefreshing="{Binding IsRefreshing}">
@@ -34,6 +92,6 @@
         
         <Button Text="Fetch Cars" Command="{Binding GetCarListCommand}" IsEnabled="{Binding IsNotBusy}" 
                 Grid.Row="1" Grid.Column="0" Margin="10"></Button>
-    </Grid>
+    </Grid>-->
 
 </ContentPage>
