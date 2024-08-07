@@ -3,7 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.10.35027.167
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MobileCarApp", "MobileCarApp\MobileCarApp.csproj", "{371A317E-C388-4A4F-8126-74A818A05B4E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MobileCarApp", "MobileCarApp\MobileCarApp.csproj", "{371A317E-C388-4A4F-8126-74A818A05B4E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MobileCarApp.API", "MobileCarApp.API\MobileCarApp.API.csproj", "{07558DB8-7F32-4C3E-B1C2-104B9B2B482F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -17,6 +19,10 @@ Global
 		{371A317E-C388-4A4F-8126-74A818A05B4E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{371A317E-C388-4A4F-8126-74A818A05B4E}.Release|Any CPU.Build.0 = Release|Any CPU
 		{371A317E-C388-4A4F-8126-74A818A05B4E}.Release|Any CPU.Deploy.0 = Release|Any CPU
+		{07558DB8-7F32-4C3E-B1C2-104B9B2B482F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{07558DB8-7F32-4C3E-B1C2-104B9B2B482F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{07558DB8-7F32-4C3E-B1C2-104B9B2B482F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{07558DB8-7F32-4C3E-B1C2-104B9B2B482F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
