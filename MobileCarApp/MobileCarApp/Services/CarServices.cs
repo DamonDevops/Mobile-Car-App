@@ -8,6 +8,8 @@ public class CarServices
 {
     private SQLiteConnection conn;
     private string _dbPath;
+    public string StatusMessage;
+    int result = 0;
 
     public CarServices(string dbPath)
     {
@@ -29,43 +31,79 @@ public class CarServices
             Init();
             return conn.Table<Car>().ToList();
         }
-        catch(Exception e)
+        catch(Exception)
         {
-            Debug.WriteLine($"Unable to get cars: {e.Message}");
-            //await Shell.Current.DisplayAlert("Error", "Failed to retrive list of cars.", "Ok");
+            StatusMessage = "Failed to retrieve list of cars.";
         }
 
         return new List<Car>();
-        //return new List<Car>()
-        //{
-        //    new Car
-        //    {
-        //        Id = 1, Make = "Honda", Model = "Fit", Vin = "123"
-        //    },
-        //    new Car
-        //    {
-        //        Id = 2, Make = "Toyota", Model = "Prado", Vin = "123"
-        //    },
-        //    new Car
-        //    {
-        //        Id = 3, Make = "Honda", Model = "Civic", Vin = "123"
-        //    },
-        //    new Car
-        //    {
-        //        Id = 4, Make = "Audi", Model = "A5", Vin = "123"
-        //    },
-        //    new Car
-        //    {
-        //        Id = 5, Make = "BMW", Model = "M3", Vin = "123"
-        //    },
-        //    new Car
-        //    {
-        //        Id = 6, Make = "Nissan", Model = "Note", Vin = "123"
-        //    },
-        //    new Car
-        //    {
-        //        Id = 7, Make = "Ferrari", Model = "Spider", Vin = "123"
-        //    }
-        //};
+    }
+
+    public Car? GetCar(int id)
+    {
+        try
+        {
+            Init();
+            return conn.Table<Car>().FirstOrDefault(q => q.Id == id);
+        }
+        catch (Exception)
+        {
+            StatusMessage = "Failed to retrieve data.";
+        }
+
+        return null;
+    }
+
+    public void AddCar(Car car)
+    {
+        try
+        {
+            Init();
+
+            if (car == null)
+                throw new Exception("Invalid Car Record");
+
+            result = conn.Insert(car);
+            StatusMessage = result == 0 ? "Insert Failed" : "Insert Successful";
+        }
+        catch(Exception)
+        {
+            StatusMessage = "Failed to insert Data";
+        }
+    }
+
+    public void UpdateCar(Car car)
+    {
+        try
+        {
+            Init();
+
+            if (car == null)
+                throw new Exception("Invalid Car Record");
+
+            result = conn.Update(car);
+            StatusMessage = result == 0 ? "Update Failed" : "Update Successful";
+        }
+        catch (Exception)
+        {
+            StatusMessage = "Failed to Update data.";
+        }
+    }
+
+    public int DeleteCar(int id)
+    {
+        try
+        {
+            Init();
+            result = conn.Table<Car>().Delete(q => q.Id == id);
+            StatusMessage = result == 0 ? "Deletion Failed" : "Deleted Successfully";
+            return result;
+        }
+        catch (Exception)
+        {
+            StatusMessage = "Failed to delete data.";
+        }
+
+        return 0;
     }
 }
