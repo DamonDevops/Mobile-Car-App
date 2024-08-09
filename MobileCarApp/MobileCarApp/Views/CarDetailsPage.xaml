@@ -4,12 +4,22 @@
              xmlns:vm="clr-namespace:MobileCarApp.ViewModels"
              x:Class="MobileCarApp.Views.CarDetailsPage"
              x:DataType="vm:CarDetailsViewModel"
-             Title="{Binding Car.Model}">
+             Title="{Binding Car.Make}">
     <VerticalStackLayout>
+        <Label 
+            Text="{Binding Car.Make}"
+            VerticalOptions="Center" 
+            HorizontalOptions="Center"
+            FontSize="Medium"/>
+        <Label 
+            Text="{Binding Car.Model}"
+            VerticalOptions="Center" 
+            HorizontalOptions="Center"
+            FontSize="Medium"/>
         <Label 
             Text="{Binding Car.Vin}"
             VerticalOptions="Center" 
             HorizontalOptions="Center"
-            FontSize="100"/>
+            FontSize="Medium"/>
     </VerticalStackLayout>
 </ContentPage>

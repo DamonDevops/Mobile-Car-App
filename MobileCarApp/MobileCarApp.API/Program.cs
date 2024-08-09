@@ -44,10 +44,10 @@ namespace MobileCarApp.API
             {
                 var record = await db.Cars.FindAsync(id);
                 if (record is null) return Results.NotFound();
-
-                car.Make = record.Make;
-                car.Model = record.Model;
-                car.Vin = record.Vin;
+                
+                record.Make = car.Make;
+                record.Model = car.Model;
+                record.Vin = car.Vin;
 
                 await db.SaveChangesAsync();
                 return Results.NoContent();
