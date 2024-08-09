@@ -1,6 +1,7 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using MobileCarApp.Models;
+using MobileCarApp.Services;
 using MobileCarApp.ViewModels.Common;
 using MobileCarApp.Views;
 using System.Collections.ObjectModel;
@@ -12,26 +13,28 @@ public partial class CarListViewModel : BaseViewModel
 {
     const string editButtonText = "Update Car";
     const string createButtonText = "Add Car";
-    public ObservableCollection<Car> Cars { get; private set; } = new();
+    private readonly CarApiServices _carApiServices;
+
+    public ObservableCollection<Car> Cars { get; private set; } = [];
 
     [ObservableProperty]
     bool isRefreshing;
     [ObservableProperty]
-    string make;
+    string make = string.Empty;
     [ObservableProperty]
-    string model;
+    string model = string.Empty;
     [ObservableProperty]
-    string vin;
+    string vin = string.Empty;
     [ObservableProperty]
     string addEditButtonText;
     [ObservableProperty]
     int carId;
 
-    public CarListViewModel()
+    public CarListViewModel(CarApiServices carApiServices)
     {
+        _carApiServices = carApiServices;
         Title = "Car List";
         AddEditButtonText = createButtonText;
-        GetCarList().Wait();
     }
 
     [RelayCommand]
@@ -43,7 +46,9 @@ public partial class CarListViewModel : BaseViewModel
             IsBusy = true;
             if (Cars.Any()) Cars.Clear();
 
-            var cars = App.CarServices.GetCars();
+            var cars = new List<Car>();
+            //cars = App.CarServices.GetCars();
+            cars = await _carApiServices.GetCars();
             foreach (var car in cars)
             {
                 Cars.Add(car);
@@ -83,23 +88,18 @@ public partial class CarListViewModel : BaseViewModel
         if(CarId != 0)
         {
             car.Id = CarId;
-            App.CarServices.UpdateCar(car);
+            //App.CarServices.UpdateCar(car);
+            await _carApiServices.UpdateCar(CarId, car);
             await Shell.Current.DisplayAlert("Info", App.CarServices.StatusMessage, "Ok");
         }
         else
         {
-            App.CarServices.AddCar(car);
+            //App.CarServices.AddCar(car);
+            await _carApiServices.AddCar(car);
             await Shell.Current.DisplayAlert("Info", App.CarServices.StatusMessage, "Ok");
         }
         await GetCarList();
         await ClearForm();
-    }
-
-    [RelayCommand]
-    async Task UpdateCar(int id)
-    {
-        AddEditButtonText = editButtonText;
-        return;
     }
 
     [RelayCommand]
@@ -110,16 +110,17 @@ public partial class CarListViewModel : BaseViewModel
             await Shell.Current.DisplayAlert("Invalid Record", "Please try again", "OK");
             return;
         }
-        var result = App.CarServices.DeleteCar(id);
-        if(result == 0)
-        {
-            await Shell.Current.DisplayAlert("Failed", App.CarServices.StatusMessage, "OK");
-        }
-        else
-        {
-            await Shell.Current.DisplayAlert("Deletion Successful", App.CarServices.StatusMessage, "OK");
-            await GetCarList();
-        }
+        //var result = App.CarServices.DeleteCar(id);
+        await _carApiServices.DeleteCar(id);
+        //if(result == 0)
+        //{
+        //    await Shell.Current.DisplayAlert("Failed", App.CarServices.StatusMessage, "OK");
+        //}
+        //else
+        //{
+        //    await Shell.Current.DisplayAlert("Deletion Successful", App.CarServices.StatusMessage, "OK");
+        //    await GetCarList();
+        //}
     }
 
     [RelayCommand]
@@ -131,6 +132,7 @@ public partial class CarListViewModel : BaseViewModel
         Make = car.Make;
         Model = car.Model;
         Vin = car.Vin;
+        await Task.CompletedTask;
     }
 
     [RelayCommand]
@@ -141,5 +143,6 @@ public partial class CarListViewModel : BaseViewModel
         Make = string.Empty;
         Model = string.Empty;
         Vin = string.Empty;
+        await Task.CompletedTask;
     }
 }

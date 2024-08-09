@@ -23,6 +23,7 @@ namespace MobileCarApp
 
             //Services
             builder.Services.AddSingleton<CarServices>(s => ActivatorUtilities.CreateInstance<CarServices>(s, dbPath));
+            builder.Services.AddTransient<CarApiServices>();
 
             //ViewModels
             builder.Services.AddSingleton<CarListViewModel>();

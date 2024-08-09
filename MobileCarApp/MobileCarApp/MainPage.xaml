@@ -36,7 +36,7 @@
             <CollectionView ItemsSource="{Binding Cars}" SelectionMode="None">
                 <CollectionView.ItemTemplate>
                     <DataTemplate x:DataType="model:Car">
-                        <Grid Padding="10" ColumnDefinitions="auto, *">
+                        <Grid Padding="10" ColumnDefinitions="*, auto">
                             <Frame HeightRequest="70" Grid.Column="0">
                                 <Frame.GestureRecognizers>
                                     <TapGestureRecognizer CommandParameter="{Binding Id}"
