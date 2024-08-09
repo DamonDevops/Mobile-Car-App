@@ -1,4 +1,4 @@
-﻿using MobileCarApp.Models;
+using MobileCarApp.Models;
 using SQLite;
 using System.Diagnostics;
 
