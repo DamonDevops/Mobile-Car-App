@@ -4,11 +4,12 @@
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:local="clr-namespace:MobileCarApp"
-    Shell.FlyoutBehavior="Disabled"
+    xmlns:viewlogin="clr-namespace:MobileCarApp.Views.Login"
+    Shell.FlyoutBehavior="Flyout"
     Title="MobileCarApp">
 
     <ShellContent
         Title="Home"
-        ContentTemplate="{DataTemplate local:MainPage}"
+        ContentTemplate="{DataTemplate viewlogin:LoadingPage}"
         Route="MainPage" />
 </Shell>

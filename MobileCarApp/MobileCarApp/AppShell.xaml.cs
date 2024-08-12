@@ -1,4 +1,5 @@
 ﻿using MobileCarApp.Views;
+using MobileCarApp.Views.Login;
 
 namespace MobileCarApp
 {
@@ -9,6 +10,8 @@ namespace MobileCarApp
             InitializeComponent();
 
             Routing.RegisterRoute(nameof(CarDetailsPage), typeof(CarDetailsPage));
+            Routing.RegisterRoute(nameof(LoginPage), typeof(LoginPage));
+            Routing.RegisterRoute(nameof(LoadingPage), typeof(LoadingPage));
         }
     }
 }

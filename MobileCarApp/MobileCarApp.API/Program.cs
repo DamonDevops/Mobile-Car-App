@@ -1,76 +1,150 @@
 
-using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
-namespace MobileCarApp.API
+namespace MobileCarApp.API;
+
+public class Program
 {
-    public class Program
+    public static void Main(string[] args)
     {
-        public static void Main(string[] args)
+        var builder = WebApplication.CreateBuilder(args);
+
+        // Add services to the container.
+        builder.Services.AddAuthorization();
+
+        // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+        builder.Services.AddEndpointsApiExplorer();
+        builder.Services.AddSwaggerGen();
+        builder.Services.AddCors(options =>
         {
-            var builder = WebApplication.CreateBuilder(args);
+            options.AddPolicy("AllowAll", a => a.AllowAnyHeader().AllowAnyOrigin().AllowAnyMethod());
+        });
+        builder.Services.AddAuthentication();
 
-            // Add services to the container.
-            builder.Services.AddAuthorization();
+        //var dbPath = Path.Join(Directory.GetCurrentDirectory(), "carlist.db");
+        //var conn = new SqliteConnection($"Data Source={dbPath}");
+        var conn = new SqliteConnection($"Data Source=C:\\Develop\\GitlabRepositories\\ClientTest\\Mobile Car App\\MobileCarApp\\MobileCarApp.API\\carlist.db");
+        builder.Services.AddDbContext<CarListDbContext>(opt => opt.UseSqlite(conn));
 
-            // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-            builder.Services.AddEndpointsApiExplorer();
-            builder.Services.AddSwaggerGen();
-            builder.Services.AddCors(options =>
+        builder.Services.AddIdentityCore<IdentityUser>()
+            .AddRoles<IdentityRole>()
+            .AddEntityFrameworkStores<CarListDbContext>();
+
+        builder.Services.AddAuthentication(options =>
+        {
+            options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+            options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+        }).AddJwtBearer(options =>
+        {
+            options.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
             {
-                options.AddPolicy("AllowAll", a => a.AllowAnyHeader().AllowAnyOrigin().AllowAnyMethod());
-            });
+                ValidateIssuer = true,
+                ValidIssuer = builder.Configuration["JwtSettings:Issuer"],
+                ValidateAudience = true,
+                ValidAudience = builder.Configuration["JwtSettings:Audience"],
+                ValidateLifetime = true,
+                ClockSkew = TimeSpan.Zero,
+                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JwtSettings:Key"]))
+            };
+        });
+        builder.Services.AddAuthorization(options => {
+            options.FallbackPolicy = new AuthorizationPolicyBuilder()
+            .AddAuthenticationSchemes()
+            .RequireAuthenticatedUser()
+            .Build();
+        });
 
-            //var dbPath = Path.Join(Directory.GetCurrentDirectory(), "carlist.db");
-            //var conn = new SqliteConnection($"Data Source={dbPath}");
-            var conn = new SqliteConnection($"Data Source=C:\\Develop\\GitlabRepositories\\ClientTest\\Mobile Car App\\MobileCarApp\\MobileCarApp.API\\carlist.db");
-            builder.Services.AddDbContext<CarListDbContext>(opt => opt.UseSqlite(conn));
+        var app = builder.Build();
 
-            var app = builder.Build();
+        // Configure the HTTP request pipeline.
+        app.UseSwagger();
+        app.UseSwaggerUI();
 
-            // Configure the HTTP request pipeline.
-            app.UseSwagger();
-            app.UseSwaggerUI();
+        app.UseHttpsRedirection();
+        app.UseCors("AllowAll");
 
-            app.UseHttpsRedirection();
-            app.UseCors("AllowAll");
+        //GET
+        app.MapGet("/cars", async (CarListDbContext db) => await db.Cars.ToListAsync());
+        app.MapGet("/cars/{id}", async (CarListDbContext db, int id) =>
+            await db.Cars.FindAsync(id) is Car car ? Results.Ok(car) : Results.NotFound()
+        );
+        //PUT
+        app.MapPut("/cars/{id}", async (CarListDbContext db, int id, Car car) =>
+        {
+            var record = await db.Cars.FindAsync(id);
+            if (record is null) return Results.NotFound();
 
-            app.MapGet("/cars", async (CarListDbContext db) => await db.Cars.ToListAsync());
-            app.MapGet("/cars/{id}", async (CarListDbContext db, int id) => 
-                await db.Cars.FindAsync(id) is Car car ? Results.Ok(car) : Results.NotFound()
-            );
-            app.MapPut("/cars/{id}", async (CarListDbContext db, int id, Car car) =>
+            record.Make = car.Make;
+            record.Model = car.Model;
+            record.Vin = car.Vin;
+
+            await db.SaveChangesAsync();
+            return Results.NoContent();
+        });
+        //DELETE
+        app.MapDelete("/cars/{id}", async (CarListDbContext db, int id) =>
+        {
+            var record = await db.Cars.FindAsync(id);
+            if (record is null) return Results.NotFound();
+
+            db.Cars.Remove(record);
+            await db.SaveChangesAsync();
+            return Results.NoContent();
+        });
+        //POST
+        app.MapPost("/cars", async (CarListDbContext db, Car car) =>
+        {
+            await db.AddAsync(car);
+            await db.SaveChangesAsync();
+
+            return Results.Ok(car);
+        });
+        app.MapPost("/login", async (LoginDTO loginDTO, CarListDbContext db, UserManager<IdentityUser> _userManager) => 
+        {
+            var user = await _userManager.FindByNameAsync(loginDTO.Username);
+            if(user is null)
             {
-                var record = await db.Cars.FindAsync(id);
-                if (record is null) return Results.NotFound();
-                
-                record.Make = car.Make;
-                record.Model = car.Model;
-                record.Vin = car.Vin;
+                return Results.Unauthorized();
+            }
 
-                await db.SaveChangesAsync();
-                return Results.NoContent();
-            });
-            app.MapDelete("/cars/{id}", async (CarListDbContext db, int id) =>
+            var isValidPassword = await _userManager.CheckPasswordAsync(user, loginDTO.Password);
+
+            if (!isValidPassword)
             {
-                var record = await db.Cars.FindAsync(id);
-                if (record is null) return Results.NotFound();
+                return Results.Unauthorized();
+            }
 
-                db.Cars.Remove(record);
-                await db.SaveChangesAsync();
-                return Results.NoContent();
-            });
-            app.MapPost("/cars", async (CarListDbContext db, Car car) =>
+            //Generate token
+
+            var response = new AuthResponseDTO
             {
-                await db.AddAsync(car);
-                await db.SaveChangesAsync();
+                UserId = user.Id,
+                Username = user.UserName,
+                Token = "PLACEHOLDER"
+            };
 
-                return Results.Ok(car);
-            });
-            app.UseAuthorization();
+            return Results.Ok(response);
+        }).AllowAnonymous();
 
-            app.Run();
-        }
+        app.UseAuthorization();
+
+        app.Run();
+    }
+    internal class LoginDTO
+    {
+        public string Username { get; set; }
+        public string Password { get; set; }
+    }
+    internal class AuthResponseDTO
+    {
+        public string UserId { get; set; }
+        public string Username { get; set; }
+        public string Token { get; set; }
     }
 }

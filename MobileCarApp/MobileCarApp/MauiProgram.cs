@@ -2,7 +2,9 @@
 using Microsoft.Extensions.Logging;
 using MobileCarApp.Services;
 using MobileCarApp.ViewModels;
+using MobileCarApp.ViewModels.Login;
 using MobileCarApp.Views;
+using MobileCarApp.Views.Login;
 
 namespace MobileCarApp
 {
@@ -28,10 +30,14 @@ namespace MobileCarApp
             //ViewModels
             builder.Services.AddSingleton<CarListViewModel>();
             builder.Services.AddTransient<CarDetailsViewModel>();
-            
+            builder.Services.AddSingleton<LoadingViewModel>();
+            builder.Services.AddSingleton<LoginViewModel>();
+
             //Pages
             builder.Services.AddTransient<CarDetailsPage>();
             builder.Services.AddSingleton<MainPage>();
+            builder.Services.AddSingleton<LoadingPage>();
+            builder.Services.AddSingleton<LoginPage>();
 
 #if DEBUG
             builder.Logging.AddDebug();
