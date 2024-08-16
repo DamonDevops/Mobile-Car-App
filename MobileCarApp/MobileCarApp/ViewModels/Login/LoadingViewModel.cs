@@ -28,13 +28,11 @@ namespace MobileCarApp.ViewModels.Login
             }
             else
             {
-                IdentityModelEventSource.ShowPII = true;
-                IdentityModelEventSource.LogCompleteSecurityArtifact = true;
                 try
                 {
                     if (new JsonWebTokenHandler().CanReadToken(token))
                     {
-                        var jsonToken = new JsonWebTokenHandler().ReadToken(token); //as JsonWebToken;
+                        var jsonToken = new JsonWebTokenHandler().ReadJsonWebToken(token); //as JsonWebToken;
                         _logger.LogInformation(jsonToken.ToString());
 
                         if (jsonToken.ValidTo < DateTime.UtcNow)
@@ -50,6 +48,8 @@ namespace MobileCarApp.ViewModels.Login
                     else
                     {
                         await Shell.Current.DisplayAlert("Authentication error", "Unreadable Token", "OK");
+                        SecureStorage.Remove("token");
+                        GoToLogin();
                     }
                 }
                 catch(Exception ex)
@@ -61,7 +61,7 @@ namespace MobileCarApp.ViewModels.Login
                         _logger.LogError(ex.Message);
                     }
 
-                    await Shell.Current.DisplayAlert("Authentication error", "There is a problem with your authentification token, please contact an administrator", "OK");
+                    await Shell.Current.DisplayAlert("Authentication error", "There was an error with your authentication, try later or contact the helpdesk if the issue persist", "OK");
                 }
             }
 

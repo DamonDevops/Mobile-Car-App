@@ -55,7 +55,7 @@ namespace MobileCarApp.ViewModels.Login
                         Role = role
                     };
                     //Navigate to app's main page
-                    await Shell.Current.GoToAsync($"{nameof(MainPage)}");
+                    await Shell.Current.GoToAsync($"//{nameof(MainPage)}");
                 }
                 else
                 {

@@ -11,5 +11,5 @@
     <ShellContent
         Title="Home"
         ContentTemplate="{DataTemplate viewlogin:LoadingPage}"
-        Route="MainPage" />
+        Route="LoadingPage" />
 </Shell>
