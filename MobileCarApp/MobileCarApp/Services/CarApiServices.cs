@@ -1,4 +1,6 @@
 ﻿using MobileCarApp.Models;
+using MobileCarApp.Models.Login;
+using MobileCarApp.Models.LoginModel;
 using Newtonsoft.Json;
 using System.Net.Http.Json;
 
@@ -19,6 +21,7 @@ public class CarApiServices
     {
         try
         {
+            await SetAuthToken();
             var response = await _httpClient.GetStringAsync("/cars");
             StatusMessage = "Retrieved successfully";
             return JsonConvert.DeserializeObject<List<Car>>(response);
@@ -87,5 +90,29 @@ public class CarApiServices
         {
             StatusMessage = "Failed to delete data.";
         }
+    }
+
+    public async Task<AuthResponse> Login(LoginModel login)
+    {
+        try
+        {
+            var response = await _httpClient.PostAsJsonAsync("/login", login);
+            response.EnsureSuccessStatusCode();
+            StatusMessage = "Login Successfull";
+
+            return JsonConvert.DeserializeObject<AuthResponse>(await response.Content.ReadAsStringAsync());                                                                                                                                                                                                                                                                                                                                                                                  
+        }
+        catch
+        {
+            StatusMessage = "Failed to Login";
+            return new AuthResponse();
+        }
+    }
+
+    public async Task SetAuthToken()
+    {
+        var token = await SecureStorage.GetAsync("token");
+        _httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+
     }
 }

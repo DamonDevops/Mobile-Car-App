@@ -1,10 +1,11 @@
-
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
+using System.Security.Claims;
 using System.Text;
 
 namespace MobileCarApp.API;
@@ -121,12 +122,44 @@ public class Program
             }
 
             //Generate token
+            var key = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(builder.Configuration["JwtSettings:Key"]));
+            var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+
+            var roles = await _userManager.GetRolesAsync(user);
+            var claims = await _userManager.GetClaimsAsync(user);
+            var tokenClass = new List<Claim>()
+            {
+                new Claim(JwtRegisteredClaimNames.Sub, user.Id), //user.Id
+                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+                new Claim(ClaimTypes.Email, user.Email), //user.Email
+                new Claim("email_confirmed", user.Email)
+            }.Union(claims)
+            .Union(roles.Select(role => new Claim(ClaimTypes.Role, role)));
+
+            var token = new SecurityTokenDescriptor
+            {
+                Issuer = builder.Configuration["JwtSettings:Issuer"],
+                Audience = builder.Configuration["JwtSettings:Audience"],
+                Subject = new ClaimsIdentity(tokenClass),
+                Expires = DateTime.UtcNow.AddMinutes(Convert.ToInt32(builder.Configuration["JwtSettings:DurationInMinutes"])),
+                SigningCredentials = credentials
+            };
+
+            //var token = new JsonWebToken(
+            //    issuer: builder.Configuration["JwtSettings:Issuer"],
+            //    audience: builder.Configuration["JwtSettings:Audience"],
+            //    claims: tokenClass,
+            //    expires: DateTime.UtcNow.AddMinutes(Convert.ToInt32(builder.Configuration["JwtSettings:DurationInMinutes"])),
+            //    signingCredentials: credentials
+            //    );
+
+            var accessToken = new JsonWebTokenHandler().CreateToken(token);
 
             var response = new AuthResponseDTO
             {
                 UserId = user.Id,
                 Username = user.UserName,
-                Token = "PLACEHOLDER"
+                Token = accessToken
             };
 
             return Results.Ok(response);

@@ -1,49 +1,72 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Microsoft.IdentityModel.JsonWebTokens;
+using Microsoft.IdentityModel.Tokens;
+using MobileCarApp.Models;
+using MobileCarApp.Models.LoginModel;
+using MobileCarApp.Services;
 using MobileCarApp.ViewModels.Common;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Security.Claims;
 
 namespace MobileCarApp.ViewModels.Login
 {
     public partial class LoginViewModel : BaseViewModel
     {
+        private CarApiServices _carApiServices;
+
         [ObservableProperty]
         string username;
         [ObservableProperty]
         string password;
+
+        public LoginViewModel(CarApiServices carApiServices)
+        {
+            _carApiServices = carApiServices;
+        }
 
         [RelayCommand]
         async Task Login()
         {
             if(string.IsNullOrEmpty(Username) || string.IsNullOrEmpty(Password))
             {
-                await DisplayLoginError();
+                await DisplayLoginMessage("Invalid Login Attempt");
             }
             else
             {
                 //Call the API to attempt a Login
-                var loginSuccess = true;
+                var loginModel = new LoginModel(username, password);
+                var response = await _carApiServices.Login(loginModel);
 
-                if (loginSuccess)
+                //Display welcome message / or not
+                await DisplayLoginMessage(_carApiServices.StatusMessage);
+
+                if (!string.IsNullOrEmpty(response.Token))
                 {
-                    //Display welcome message
-
+                    //Store token in SecureStorage
+                    await SecureStorage.SetAsync("token", response.Token);
                     //Build a menu on the fly, based on role
+                    var jsonToken = new JsonWebTokenHandler().ReadToken(response.Token) as JsonWebToken;
 
+                    var role = jsonToken.Claims.FirstOrDefault(q => q.Type.Equals(ClaimTypes.Role))?.Value;
+
+                    App.UserInfo = new UserInfo
+                    {
+                        Username = Username,
+                        Role = role
+                    };
                     //Navigate to app's main page
+                    await Shell.Current.GoToAsync($"{nameof(MainPage)}");
                 }
-
-                await DisplayLoginError();
+                else
+                {
+                    await DisplayLoginMessage("Invalid Login Attempt");
+                }
             }
         }
 
-        async Task DisplayLoginError()
+        async Task DisplayLoginMessage(string message)
         {
-            await Shell.Current.DisplayAlert("Login Invalid", "Invalid Username or Password", "OK");
+            await Shell.Current.DisplayAlert("Login Attempt", message, "OK");
             Password = string.Empty;
         }
     }
