@@ -1,7 +1,7 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.IdentityModel.JsonWebTokens;
-using Microsoft.IdentityModel.Tokens;
+using MobileCarApp.Helpers;
 using MobileCarApp.Models;
 using MobileCarApp.Models.LoginModel;
 using MobileCarApp.Services;
@@ -55,6 +55,7 @@ namespace MobileCarApp.ViewModels.Login
                         Role = role
                     };
                     //Navigate to app's main page
+                    MenuBuilder.BuildMenu();
                     await Shell.Current.GoToAsync($"//{nameof(MainPage)}");
                 }
                 else

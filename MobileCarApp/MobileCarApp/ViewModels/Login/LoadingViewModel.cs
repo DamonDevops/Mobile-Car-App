@@ -1,9 +1,12 @@
 ﻿using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Logging;
+using MobileCarApp.Helpers;
+using MobileCarApp.Models;
 using MobileCarApp.ViewModels.Common;
 using MobileCarApp.Views.Login;
 using Serilog.Core;
+using System.Security.Claims;
 
 namespace MobileCarApp.ViewModels.Login
 {
@@ -42,6 +45,12 @@ namespace MobileCarApp.ViewModels.Login
                         }
                         else
                         {
+                            App.UserInfo = new UserInfo
+                            {
+                                Username = jsonToken.Claims.FirstOrDefault(q => q.Type.Equals(ClaimTypes.Email))?.Value,
+                                Role = jsonToken.Claims.FirstOrDefault(q => q.Type.Equals(ClaimTypes.Role))?.Value
+                            };
+                            MenuBuilder.BuildMenu();
                             GoToMain();
                         }
                     }

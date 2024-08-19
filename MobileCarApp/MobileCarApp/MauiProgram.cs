@@ -32,12 +32,14 @@ namespace MobileCarApp
             builder.Services.AddTransient<CarDetailsViewModel>();
             builder.Services.AddSingleton<LoadingViewModel>();
             builder.Services.AddSingleton<LoginViewModel>();
+            builder.Services.AddTransient<LogoutViewModel>();
 
             //Pages
             builder.Services.AddTransient<CarDetailsPage>();
             builder.Services.AddSingleton<MainPage>();
             builder.Services.AddSingleton<LoadingPage>();
             builder.Services.AddSingleton<LoginPage>();
+            builder.Services.AddTransient<LogoutPage>();
 
 #if DEBUG
             builder.Logging.AddDebug();
